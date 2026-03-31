@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 
 
@@ -6,6 +6,9 @@ class UserCustomManager(BaseUserManager):
     def create_user(self, email, password, **extra_fields):
         if not email:
             raise ValueError("Поле электронной почты должно быть заполнено.")
+        if not password:
+            raise ValueError("Пароль должен быть указан.")
+
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
@@ -13,20 +16,21 @@ class UserCustomManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password, **extra_fields):
-        # Устанавливаем обязательные поля для суперпользователя
+        if not password:
+            raise ValueError("Суперпользователь должен иметь пароль.")
+
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 
-        if not extra_fields["is_staff"]:
+        if extra_fields.get("is_staff") is not True:
             raise ValueError("Суперпользователь должен иметь is_staff=True.")
-
-        if not extra_fields["is_superuser"]:
+        if extra_fields.get("is_superuser") is not True:
             raise ValueError("Суперпользователь должен иметь is_superuser=True.")
 
         return self.create_user(email, password, **extra_fields)
 
 
-class User(AbstractUser):
+class User(AbstractBaseUser, PermissionsMixin):
     username = None
     email = models.EmailField(unique=True, verbose_name="Email")
     first_name = models.CharField(max_length=50, verbose_name="Имя", blank=True, null=True)
@@ -41,11 +45,16 @@ class User(AbstractUser):
     avatar = models.ImageField(
         upload_to="users/avatars/", verbose_name="Аватар", blank=True, null=True, help_text="Загрузите свой аватар"
     )
-
     token = models.CharField(max_length=100, verbose_name="Token", blank=True, null=True)
+
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+    objects = UserCustomManager()
 
     class Meta:
         verbose_name = "Пользователь"
