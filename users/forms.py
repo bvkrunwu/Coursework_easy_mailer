@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import BooleanField, ModelForm
 
@@ -25,3 +26,22 @@ class ProfileEditForm(StyleFormMixin, ModelForm):
         model = User
         fields = ("first_name", "last_name", "middle_name", "country", "phone_number", "avatar")
         exclude = ("email",)
+
+
+class PasswordResetRequestForm(forms.Form):
+    email = forms.EmailField()
+
+
+class PasswordResetConfirmForm(forms.Form):
+    new_password = forms.CharField(widget=forms.PasswordInput, label="Новый пароль")
+    confirm_password = forms.CharField(widget=forms.PasswordInput, label="Повторите пароль")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get("new_password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if new_password != confirm_password:
+            raise forms.ValidationError("Пароли не совпадают")
+
+        return cleaned_data
