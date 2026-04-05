@@ -49,6 +49,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
+    is_blocked = models.BooleanField(default=False, verbose_name="Заблокирован")
     date_joined = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = "email"
@@ -59,6 +60,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
+        permissions = [("can_view_all_users", "Can view all users"), ("can_block_users", "Can block users")]
 
     def __str__(self):
         return self.email

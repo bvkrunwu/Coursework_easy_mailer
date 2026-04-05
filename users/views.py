@@ -16,7 +16,7 @@ from users.models import User
 @method_decorator(login_required, name="dispatch")
 class UserDetailView(DetailView):
     model = User
-    template_name = "profile.html"
+    template_name = "users/profile.html"
     context_object_name = "user"
 
     def get_object(self, queryset=None):
@@ -27,7 +27,7 @@ class UserDetailView(DetailView):
 class UserUpdateView(UpdateView):
     model = User
     form_class = ProfileEditForm
-    template_name = "edit_profile.html"
+    template_name = "users/edit_profile.html"
     success_url = reverse_lazy("users:profile")
 
     def get_object(self, queryset=None):

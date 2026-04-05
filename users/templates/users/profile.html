@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends 'mailing/base.html' %}
 
 {% block title %}Профиль пользователя{% endblock %}
 
@@ -9,8 +9,8 @@
     <div class="card">
         <div class="card-body">
             {% if user.avatar %}
-            <img src="{ user.avatar | media_filter }}" alt="{{ user.email }}" class="rounded-circle mb-3"
-                 style="width: 100px; height: 100px; object-fit: cover;">
+            <img src="{{ user.avatar.url }}" alt="{{ user.email }}" class="rounded-circle mb-3"
+                 style="width: 200px; height: 200px; object-fit: cover;">
             {% else %}
             <div class="rounded-circle bg-secondary mb-3 d-inline-block" style="width: 100px; height: 100px;"></div>
             {% endif %}
@@ -21,7 +21,7 @@
             </p>
             <div class="mt-3">
                 <a href="{% url 'users:edit_profile' %}" class="btn btn-primary">Редактировать профиль</a>
-                <a href="{% url 'users:logout' %}" class="btn btn-outline-secondary">Выйти</a>
+                <a href="{% url 'users:logout' %}" class="btn btn-danger">Выйти</a>
             </div>
         </div>
     </div>
