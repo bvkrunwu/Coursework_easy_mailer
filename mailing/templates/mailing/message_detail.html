@@ -1,0 +1,28 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Сообщение{% endblock %}
+
+{% block content %}
+    <main class="flex-shrink-0">
+        <div class="container">
+            <h1 class="mt-5">Сообщение</h1>
+            <p class="lead"></p>
+            <div class="row mb-2">
+                <div class="col-md-12">
+                    <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                        <div class="col p-4 d-flex flex-column position-static">
+                            <strong class="d-inline-block mb-2 text-primary-emphasis">Тема
+                                письма: {{ message.subject }}</strong>
+                            <strong class="d-inline-block mb-2 text-primary-emphasis">Содержание: {{ message.body }}</strong>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-12">
+                                <a class="btn btn-outline-secondary btn-sm" href="{% url 'mailing:message_list' %}" role="button">Назад</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Управление рассылкой{% endblock %}
+
+{% block content %}
+    <main class="flex-shrink-0">
+        <div class="container">
+            <h1 class="mt-5">Управление рассылкой</h1>
+            <p class="lead">Вы можете добавлять, просматривать, редактировать и удалять рассылку</p>
+
+            <div class="container">
+                {% if user.is_authenticated %}
+                    <p>
+                        <a class="btn btn-outline-primary btn-sm" href="{% url 'mailing:campaign_create' %}"
+                           role="button">Создать рассылку</a>
+                    </p>
+                    <p>
+                        {% for campaign in campaigns %}
+                            <p>{{ campaign.title }}</p>
+                            <a class="p-2 btn btn-outline-primary" href="{% url 'mailing:send_mail' pk=campaign.pk %}">Отправить</a>
+                        {% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-12">
+
+                    {% for object in object_list %}
+
+                        <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                            <div class="col p-4 d-flex flex-column position-static">
+
+                                {% for value in object.subscriber.all.values_list %}
+                                    <strong class="d-inline-block mb-2 text-primary-emphasis">Получатель: {{ value.2 }}</strong>
+                                {% endfor %}
+
+                                <strong class="d-inline-block mb-2 text-primary-emphasis">Сообщение: {{ object.message }}</strong>
+                                <strong class="d-inline-block mb-2 text-primary-emphasis">Статус
+                                    рассылки: {{ object.status |yesno:"Активна, Не активна" }}</strong>
+
+                                {% if user.is_authenticated %}
+                                    <strong class="d-inline-block mb-2 text-primary-emphasis">Автор: {{ object.owner }}</strong>
+                                    <strong class="d-inline-block mb-2 text-primary-emphasis">Активность: {{ object.is_active |yesno:"Активна, Не активна" }}</strong>
+                                    <strong class="d-inline-block mb-2 text-primary-emphasis">Дата первой
+                                        отправки: {{ object.start_time |date:"d M Y" }}</strong>
+                                    <strong class="d-inline-block mb-2 text-primary-emphasis">Дата окончания
+                                        отправки: {{ object.end_time |date:"d M Y" }}</strong>
+                                {% endif %}
+
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            {% if user.is_authenticated %}
+
+                                <div class="col-md-12">
+                                    <a class="btn btn-outline-primary btn-sm"
+                                       href="{% url 'mailing:campaign_detail' object.pk %}" role="button">Посмотреть</a>
+
+                                    {% if object.owner == request.user %}
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           href="{% url 'mailing:campaign_update' object.pk %}" role="button">Редактировать</a>
+                                        <a class="btn btn-outline-danger btn-sm"
+                                           href="{% url 'mailing:campaign_delete' object.pk %}"
+                                           role="button">Удалить</a>
+                                    {% endif %}
+
+                                    {% if perms.mailing.can_disable_campaigns and not user.is_superuser %}
+                                        <a class="btn btn-outline-dark btn-sm"
+                                           href="{% url 'mailing:disable_campaign' object.pk %}" role="button">Отключить
+                                            рассылку</a>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </main>
+{% endblock %}

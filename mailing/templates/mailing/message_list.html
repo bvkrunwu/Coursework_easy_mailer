@@ -1,0 +1,49 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Управление сообщениями{% endblock %}
+
+{% block content %}
+    <main class="flex-shrink-0">
+        <div class="container">
+            <h1 class="mt-5">Управление сообщениями</h1>
+            <p class="lead">Вы можете добавлять, просматривать, редактировать и удалять сообщения</p>
+            <div class="container">
+                {% if user.is_authenticated %}
+                    <a class="btn btn-outline-primary btn-sm" href="{% url 'mailing:message_create' %}" role="button">Создать
+                        сообщение</a>
+                {% endif %}
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-12">
+                    {% for object in object_list %}
+                        <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                            <div class="col p-4 d-flex flex-column position-static">
+                                <strong class="d-inline-block mb-2 text-primary-emphasis">Тема
+                                    сообщения: {{ object.subject }}</strong>
+                                <strong class="d-inline-block mb-2 text-primary-emphasis">Содержание: {{ object.body }}</strong>
+                                <strong class="d-inline-block mb-2 text-primary-emphasis">Автор: {{ object.owner }}</strong>
+
+                            </div>
+                            <div class="row mb-2">
+                                {% if user.is_authenticated %}
+                                    <div class="col-md-12">
+                                        <a class="btn btn-outline-primary btn-sm"
+                                           href="{% url 'mailing:message_detail' object.pk %}"
+                                           role="button">Посмотреть</a>
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           href="{% url 'mailing:message_update' object.pk %}"
+                                           role="button">Редактировать</a>
+
+                                        <a class="btn btn-outline-danger btn-sm"
+                                           href="{% url 'mailing:message_delete' object.pk %}"
+                                           role="button">Удалить</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}

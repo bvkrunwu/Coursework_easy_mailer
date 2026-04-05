@@ -1,0 +1,94 @@
+{% extends "mailing/base.html" %}
+
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+    <main class="flex-shrink-0">
+        <div class="container text-center">
+            <h1 class="mt-5">Добро пожаловать в EasyMailer — сервис управления рассылками</h1>
+            <p class="lead mb-4">Всё под контролем: создавайте, отправляйте и анализируйте рассылки в одном месте.</p>
+
+            <div class="row mb-5 justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <p>EasyMailer — это платформа для автоматизации email‑рассылок. С её помощью вы
+                                можете:</p>
+                            <ul class="list-unstyled text-center mb-4">
+                                <li class="mb-2 d-flex justify-content-center align-items-center">
+                                    <i class="bi bi-check text-primary me-2"></i>
+                                    <span>Создавать профессиональные письма с помощью удобного конструктора</span>
+                                </li>
+                                <li class="mb-2 d-flex justify-content-center align-items-center">
+                                    <i class="bi bi-check text-primary me-2"></i>
+                                    <span>Сегментировать аудиторию и настраивать таргетированные рассылки</span>
+                                </li>
+                                <li class="mb-2 d-flex justify-content-center align-items-center">
+                                    <i class="bi bi-check text-primary me-2"></i>
+                                    <span>Отслеживать открываемость, клики и конверсию в реальном времени</span>
+                                </li>
+                                <li class="mb-2 d-flex justify-content-center align-items-center">
+                                    <i class="bi bi-check text-primary me-2"></i>
+                                    <span>Управлять списками подписчиков и автоматизировать процессы</span>
+                                </li>
+                            </ul>
+
+                            {% if user.is_authenticated %}
+                                <p class="mt-4">Начните работу прямо сейчас — создайте первую рассылку за несколько
+                                    минут!</p>
+                            {% else %}
+                                <!-- Вариант 4: с фокусом на результат -->
+                                <div class="mt-4 p-4 bg-primary bg-opacity-10 rounded">
+                                    <p class="h4 text-primary mb-3 fw-bold">
+                                        Создайте свою первую рассылку уже сегодня! Для доступа к сервису
+                                        зарегистрируйтесь или войдите в аккаунт.
+                                    </p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if user.is_authenticated %}
+                    <div class="mt-5">
+                    <h2 class="mb-4 text-center">Ваша статистика</h2>
+
+                    <div class="row mb-2 justify-content-center">
+                        <div class="col-md-8">
+                            <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                                <div class="col p-4 d-flex flex-column position-static">
+                                    <strong class="d-inline-block mb-2 text-primary-emphasis">Количество всех
+                                        рассылок: {{ mail_count }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 justify-content-center">
+                        <div class="col-md-8">
+                            <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                                <div class="col p-4 d-flex flex-column position-static">
+                                    <strong class="d-inline-block mb-2 text-primary-emphasis">Количество активных
+                                        рассылок: {{ active_count }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-2 justify-content-center">
+                        <div class="col-md-8">
+                            <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                                <div class="col p-4 d-flex flex-column position-static">
+                                    <strong class="d-inline-block mb-2 text-primary-emphasis">Количество уникальных
+                                        получателей: {{ unique_email }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
