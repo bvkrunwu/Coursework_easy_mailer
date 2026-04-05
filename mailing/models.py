@@ -27,7 +27,8 @@ class Subscriber(models.Model):
         verbose_name_plural = "Получатели рассылок"
         ordering = ["full_name"]
         permissions = [
-            ("can_block_client", "Can block client"),
+            ("can_block_subscriber", "Can block subscriber"),
+            ("can_view_all_subscribers", "Can view all subscribers"),
         ]
         indexes = [
             models.Index(fields=["email"]),
@@ -109,7 +110,8 @@ class Campaign(models.Model):
         verbose_name_plural = "Рассылки"
         ordering = ["-start_time"]
         permissions = [
-            ("set_is_active", "Set is active"),
+            ("can_view_all_campaigns", "Can view all campaigns"),
+            ("can_disable_campaigns", "Can disable campaigns"),
         ]
         indexes = [
             models.Index(fields=["start_time"]),
