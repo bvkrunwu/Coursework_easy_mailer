@@ -1,7 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.core.mail import send_mail
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import (
@@ -14,6 +15,7 @@ from django.views.generic import (
 )
 from django.views.generic.edit import View
 
+from config.settings import EMAIL_HOST_USER
 from mailing.forms import (
     CampaignForm,
     CampaignModeratorForm,
@@ -294,3 +296,65 @@ class CampaignDeleteView(LoginRequiredMixin, DeleteView):
         if self.request.user == obj.owner:
             return obj
         raise PermissionDenied
+
+
+class CampaignSendView(LoginRequiredMixin, View):
+
+    def get(self, request, pk, *args, **kwargs):
+        mailing = get_object_or_404(Campaign, pk=pk)
+
+        return render(request, "mailing/campaign_send.html", {"mailing": mailing})
+
+    def post(self, request, pk, *args, **kwargs):
+        mailing = get_object_or_404(Campaign, pk=pk)
+
+        if mailing and mailing.status == "created" or mailing.status == "launched":
+            recipients = mailing.recipients.all()
+
+            for recipient in recipients:
+                try:
+                    send_mail(mailing.message.subject, mailing.message.body, EMAIL_HOST_USER, [recipient.email])
+
+                    DisabledCampaignView.objects.create(
+                        mailing=mailing, status="success", response="Сообщение отправлено успешно"
+                    )
+
+                except Exception as e:
+                    DisabledCampaignView.objects.create(mailing=mailing, status="not_success", response=str(e))
+
+        mailing.status = "started"
+        mailing.save()
+
+        return redirect("mailing:campaign_list")
+
+
+class CampaignReportView(LoginRequiredMixin, DetailView):
+    model = Campaign
+    template_name = "mailing/campaign_report.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["STATUS_SUCCESS"] = self.object.attempts.filter(status="success").count()
+        context["STATUS_SUCCESS"] = self.object.attempts.filter(status="not_success").count()
+        context["total_attempts"] = self.object.attempts.count()
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        return super().get(request, *args, **kwargs)
+
+
+class DisabledCampaignView(LoginRequiredMixin, View):
+
+    def post(self, request, pk):
+        mailing = get_object_or_404(Campaign, id=pk)
+
+        if not request.user.has_perm("mailing.can_disable_campaigns"):
+            return HttpResponseForbidden("У вас недостаточно прав для отключения рассылки")
+
+        mailing.status = "completed"
+        mailing.save()
+
+        return redirect("mailing:mailing", pk=mailing.id)

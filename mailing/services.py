@@ -1,72 +1,40 @@
-from smtplib import SMTPException
-
-from django.conf import settings
-from django.contrib import messages
 from django.core.cache import cache
-from django.core.mail import send_mail
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.utils import timezone
 
-from .models import Campaign, DeliveryAttempt, Subscriber
+from config.settings import CACHE_ENABLED
+from mailing.models import Campaign, Message, Subscriber
 
 
-def run_mail(request, pk):
-    mailing = Campaign.objects.get(pk=pk)
-    current_time = timezone.now()
+def get_all_recipients():
+    if CACHE_ENABLED:
+        recipients = cache.get("recipients")
+        if recipients is None:
+            recipients = Subscriber.objects.all()
+            cache.set("recipients", recipients, 120)
+        else:
+            recipients = Subscriber.objects.all()
 
-    # Проверка владельца рассылки
-    if mailing.owner != request.user:
-        messages.error(request, "Вы не имеете прав на запуск этой рассылки.")
-        return HttpResponseRedirect(reverse("mailing:campaign_list"))
-
-    if mailing.start_time <= current_time <= mailing.end_time:
-        mailing.update_status()
-
-        for recipient in mailing.recipients.filter(is_active=True):
-            try:
-                send_mail(
-                    subject=mailing.message.subject,
-                    message=mailing.message.body,
-                    from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=[recipient.email],
-                    fail_silently=False,
-                )
-
-                DeliveryAttempt.objects.create(
-                    campaign=mailing,
-                    delivery_status=DeliveryAttempt.STATUS_SUCCESS,
-                    server_response="Email sent successfully",
-                )
-
-            except SMTPException as smtp_err:
-                DeliveryAttempt.objects.create(
-                    campaign=mailing,
-                    delivery_status=DeliveryAttempt.STATUS_FAILED,
-                    server_response=f"SMTP Error: {smtp_err}",
-                )
-
-            except Exception as general_err:
-                print(f"General error occurred while processing {recipient.email}: {general_err}")
-
-        messages.success(request, "Рассылка успешно запущена!")
-        return HttpResponseRedirect(reverse("mailing:campaign_list"))
-    else:
-        messages.error(request, "Рассылка не может быть запущена в данный момент.")
-        return HttpResponseRedirect(reverse("mailing:campaign_list"))
+        return recipients
 
 
-def get_clients_from_cache():
-    if not settings.CACHE_ENABLED:
-        return Subscriber.objects.all()
+def get_all_messages():
+    if CACHE_ENABLED:
+        messages = cache.get("messages")
+        if messages is None:
+            messages = Message.objects.all()
+            cache.set("messages", messages, 120)
+        else:
+            messages = Message.objects.all()
 
-    key = "client_list"
-    cached_data = cache.get(key)
+        return messages
 
-    if cached_data is not None:
-        return cached_data
 
-    subscribers = Subscriber.objects.all()
-    cache.set(key, subscribers)
+def get_all_mailing():
+    if CACHE_ENABLED:
+        mailing = cache.get("mailing")
+        if mailing is None:
+            mailing = Campaign.objects.all()
+            cache.set("mailing", mailing, 120)
+        else:
+            mailing = Campaign.objects.all()
 
-    return subscribers
+        return mailing

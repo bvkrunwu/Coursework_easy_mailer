@@ -1,16 +1,18 @@
 from django.urls import path
 
 from mailing.apps import MailingConfig
-from mailing.services import run_mail
 from mailing.views import (
     BlockSubscriberView,
     CampaignCreateView,
     CampaignDeleteView,
     CampaignDetailView,
     CampaignListView,
+    CampaignReportView,
+    CampaignSendView,
     CampaignUpdateView,
     Contacts,
     DisableCampaignView,
+    DisabledCampaignView,
     MainView,
     MessageCreateView,
     MessageDeleteView,
@@ -46,5 +48,7 @@ urlpatterns = [
     path("campaigns/<int:pk>/update/", CampaignUpdateView.as_view(), name="campaign_update"),
     path("campaigns/<int:pk>/delete/", CampaignDeleteView.as_view(), name="campaign_delete"),
     path("campaign/disable/<int:pk>/", DisableCampaignView.as_view(), name="disable_campaign"),
-    path("campaigns/<int:pk>/send/", run_mail, name="send_mail"),
+    path("mailing_send/<int:pk>/", CampaignSendView.as_view(), name="campaign_send"),
+    path("mailing_report/<int:pk>/", CampaignReportView.as_view(), name="mailing_report"),
+    path("disabling_mailing/<int:pk>/", DisabledCampaignView.as_view(), name="disabling_mailing"),
 ]

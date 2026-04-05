@@ -1,15 +1,35 @@
+from django.core.mail import send_mail
 from django.core.management import BaseCommand
 
-from mailing.services import run_mail
+from config.settings import EMAIL_HOST_USER
+from mailing.models import Campaign, DeliveryAttempt
 
 
 class Command(BaseCommand):
-    help = "Initiates a specific mailing by its primary key"
+    def handle(self):
 
-    def add_arguments(self, parser):
-        parser.add_argument("campaign_pk", type=int, help="Primary Key of the Mailing to be initiated")
+        def send_mailing():
+            mailings = Campaign.objects.filter(status__in=("created", "launched"))
+            for mailing in mailings:
 
-    def handle(self, *args, **options):
-        campaign_pk = options["campaign_pk"]
-        run_mail(campaign_pk)
-        self.stdout.write(self.style.SUCCESS(f"Mailing with PK={campaign_pk} initiated."))
+                if mailing.enabled is True:
+
+                    recipients = mailing.recipients.all()
+
+                    for recipient in recipients:
+                        try:
+                            send_mail(
+                                mailing.message.subject, mailing.message.body, EMAIL_HOST_USER, [recipient.email]
+                            )
+
+                            DeliveryAttempt.objects.create(
+                                mailing=mailing, status="success", response="Сообщение отправлено успешно"
+                            )
+
+                        except Exception as e:
+                            DeliveryAttempt.objects.create(mailing=mailing, status="not_success", response=str(e))
+
+                    mailing.status = "launched"
+                    mailing.save()
+
+        send_mailing()

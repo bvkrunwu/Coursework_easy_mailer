@@ -1,0 +1,22 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Запуск рассылки{% endblock %}
+
+{% block content %}
+    <h2 class="text-center">Запуск рассылки</h2>
+    <div class="row">
+        <div class="col-3">
+        </div>
+        <div class="col-6">
+            <p>Запустить рассылку сообщений "{{ mailing.message.subject }}"</p>
+            <form method="post" action="{% url 'mailing:campaign_send' pk=mailing.pk %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <button type="submit" class="btn btn-outline-primary btn-sm">Запустить рассылку</button>
+                <a href="{% url 'mailing:mailing_list' %}" class="btn btn-outline-secondary btn-sm">Отмена</a>
+            </form>
+        </div>
+        <div class="col-3">
+        </div>
+    </div>
+{% endblock %}

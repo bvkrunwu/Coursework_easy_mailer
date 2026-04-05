@@ -14,12 +14,7 @@
                         <a class="btn btn-outline-primary btn-sm" href="{% url 'mailing:campaign_create' %}"
                            role="button">Создать рассылку</a>
                     </p>
-                    <p>
-                        {% for campaign in campaigns %}
-                            <p>{{ campaign.title }}</p>
-                            <a class="p-2 btn btn-outline-primary" href="{% url 'mailing:send_mail' pk=campaign.pk %}">Отправить</a>
-                        {% endfor %}
-                    </p>
+
                 {% endif %}
             </div>
             <div class="row mb-2">
