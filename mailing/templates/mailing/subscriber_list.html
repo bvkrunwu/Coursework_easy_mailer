@@ -1,0 +1,87 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Управление клиентами{% endblock %}
+
+{% block content %}
+    <main class="flex-shrink-0">
+        <div class="container">
+            <h1 class="mt-5">Управление клиентами</h1>
+            <p class="lead">Вы можете добавлять, просматривать, редактировать и удалять получателей рассылки
+                (клиентов)</p>
+
+            {% if user.is_authenticated %}
+                <p>
+                    <a class="btn btn-outline-primary btn-sm" href="{% url 'mailing:subscriber_create' %}"
+                       role="button">Создать получателя</a>
+                </p>
+            {% endif %}
+
+            <div class="row mb-2">
+                <div class="col-md-12">
+                    {% if object_list %}
+                        {% for object in object_list %}
+                            <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                                <div class="col p-4 d-flex flex-column position-static">
+                                    <strong class="d-inline-block mb-2 text-primary-emphasis">Электронная
+                                        почта: {{ object.email }}</strong>
+                                    <strong class="d-inline-block mb-2 text-primary-emphasis">ФИО: {{ object.full_name }}</strong>
+                                    <strong class="d-inline-block mb-2 text-primary-emphasis">Комментарии: {{ object.comment|default:"—" }}</strong>
+                                    <strong class="d-inline-block mb-2 text-primary-emphasis">Автор: {{ object.owner }}</strong>
+                                </div>
+
+                                <div class="col-auto d-flex align-items-end justify-content-start mb-2">
+                                    <div class="btn-group">
+                                        <a class="btn btn-outline-primary btn-sm"
+                                           href="{% url 'mailing:subscriber_detail' object.pk %}" role="button">Посмотреть</a>
+
+                                        {% if object.owner == request.user %}
+                                            <a class="btn btn-outline-secondary btn-sm"
+                                               href="{% url 'mailing:subscriber_update' object.pk %}" role="button">Редактировать</a>
+                                            <a class="btn btn-outline-danger btn-sm"
+                                               href="{% url 'mailing:subscriber_delete' object.pk %}" role="button">Удалить</a>
+                                        {% endif %}
+
+                                        {% if perms.mailing.can_block_subscriber and not user.is_superuser %}
+                                            <button class="btn btn-outline-dark btn-sm"
+                                                    onclick="toggleActive({{ object.pk }}, this)">
+                                                {% if object.is_active %}
+                                                    Заблокировать
+                                                {% else %}
+                                                    Активировать
+                                                {% endif %}
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            У вас пока нет ни одного клиента. <a href="{% url 'mailing:subscriber_create' %}">Добавьте
+                            первого!</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleActive(id, button) {
+            const actionUrl = "{% url 'mailing:block_subscriber' 0 %}".replace('0', id);
+            fetch(actionUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        let label = button.textContent.includes('Заблокировать') ? 'Активировать' : 'Заблокировать';
+                        button.textContent = label;
+                    }
+                });
+        }
+    </script>
+{% endblock %}

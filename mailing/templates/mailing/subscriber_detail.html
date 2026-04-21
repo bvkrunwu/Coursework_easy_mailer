@@ -1,0 +1,30 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Получатель рассылки{% endblock %}
+
+{% block content %}
+    <main class="flex-shrink-0">
+        <div class="container">
+            <h1 class="mt-5">Получатель рассылки</h1>
+            <p class="lead"></p>
+            <div class="row mb-2">
+                <div class="col-md-12">
+                    <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                        <div class="col p-4 d-flex flex-column position-static">
+                            <strong class="d-inline-block mb-2 text-primary-emphasis">Электронная
+                                почта: {{ subscriber.email }}</strong>
+                            <strong class="d-inline-block mb-2 text-primary-emphasis">Фамилия Имя Отчество: {{ subscriber.full_name }}</strong>
+                            <strong class="d-inline-block mb-2 text-primary-emphasis">Комментарии: {{ subscriber.comment }}</strong>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-12">
+                                <a class="btn btn-primary" href="{% url 'mailing:subscriber_list' %}"
+                                   role="button">Назад</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
